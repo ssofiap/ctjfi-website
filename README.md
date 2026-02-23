@@ -1,6 +1,6 @@
 # Church Website Development
 ### Overview
-This project involves the development of a modern, user-friendly website for CTJFI. The goal is to create an online presence that effectively communicates the church's mission, provides valuable resources for members and visitors, and fosters a sense of community. The website will feature essential information, upcoming events, multimedia content, and interactive functionalities.
+This project involves the development of a modern, user-friendly website for CTJFI. The goal is to create an online presence that effectively communicates the church's mission, provides valuable resources for members and visitors, and fosters a sense of community. The website will feature essential information, upcoming events, multimedia content.
 
 ### Features
 - **Home Page**: Welcoming visitors with a brief introduction.
@@ -10,13 +10,13 @@ This project involves the development of a modern, user-friendly website for CTJ
 
 ### Technology Stack
 - **Frontend**:
-HTML5, CSS3, Angular
+HTML5, CSS3, React, Tailwind
 - **Backend**:
 To be defined.
 - **Hosting**:
 To be defined.
 - **Additional Tools**:
-Git for version control, a platform to share visual ideas,...
+Git(hub) for version control, Notion for issue tracking as well as project overview, Vercel for deployment
 
 ### License
 To be defined.
