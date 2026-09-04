@@ -529,6 +529,7 @@ vercel
 ```
 
 Follow prompts, add your `.env.local` variables in Vercel dashboard.
+If you deploy through GitHub Actions, add `VERCEL_TOKEN`, `VERCEL_ORG_ID`, and `VERCEL_PROJECT_ID` as repository secrets.
 
 ### Admin Panel (Protect with auth)
 For production, add Supabase Auth:

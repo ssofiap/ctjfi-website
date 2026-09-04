@@ -16,6 +16,19 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+## Calendar Integration
+
+The service calendar reads from the Google Calendar API through the `/api/calendar` route.
+
+Add these environment variables in `.env.local`:
+
+```bash
+GOOGLE_CALENDAR_ID=your_calendar_id
+GOOGLE_CALENDAR_API_KEY=your_google_api_key
+```
+
+The calendar must be public or otherwise accessible with the API key you provide.
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
