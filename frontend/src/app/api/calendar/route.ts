@@ -1,5 +1,3 @@
-import { NextResponse } from 'next/server';
-
 type GoogleCalendarItem = {
   summary?: string;
   description?: string;
@@ -9,6 +7,8 @@ type GoogleCalendarItem = {
     date?: string;
   };
 };
+
+const CALENDAR_TIME_ZONE = "Europe/Zurich";
 
 type CalendarEvent = {
   title: string;
@@ -23,12 +23,13 @@ function formatTime(value: string) {
   const date = new Date(value);
 
   if (Number.isNaN(date.getTime())) {
-    return '';
+    return "";
   }
 
-  return new Intl.DateTimeFormat('en-US', {
-    hour: 'numeric',
-    minute: '2-digit',
+  return new Intl.DateTimeFormat("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    timeZone: CALENDAR_TIME_ZONE,
   }).format(date);
 }
 
@@ -42,25 +43,25 @@ function mapCalendarItem(item: GoogleCalendarItem): CalendarEvent | null {
   const date = item.start?.dateTime ?? `${startValue}T00:00:00`;
 
   return {
-    title: item.summary ?? 'Untitled event',
+    title: item.summary ?? "Untitled event",
     date,
-    time: item.start?.dateTime ? formatTime(item.start.dateTime) : 'All day',
-    category: 'Church',
-    description: item.description ?? '',
-    location: item.location ?? 'TBA',
+    time: item.start?.dateTime ? formatTime(item.start.dateTime) : "All day",
+    category: "Church",
+    description: item.description ?? "",
+    location: item.location ?? "TBA",
   };
 }
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 export async function GET() {
   const calendarId = process.env.GOOGLE_CALENDAR_ID;
   const apiKey = process.env.GOOGLE_CALENDAR_API_KEY;
 
   if (!calendarId || !apiKey) {
-    return NextResponse.json(
+    return Response.json(
       {
-        error: 'Missing GOOGLE_CALENDAR_ID or GOOGLE_CALENDAR_API_KEY.',
+        error: "Missing GOOGLE_CALENDAR_ID or GOOGLE_CALENDAR_API_KEY.",
       },
       { status: 500 },
     );
@@ -68,42 +69,60 @@ export async function GET() {
 
   const now = new Date();
   const timeMin = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();
-  const timeMax = new Date(now.getTime() + 180 * 24 * 60 * 60 * 1000).toISOString();
+  const timeMax = new Date(
+    now.getTime() + 180 * 24 * 60 * 60 * 1000,
+  ).toISOString();
 
   const searchParams = new URLSearchParams({
     key: apiKey,
-    singleEvents: 'true',
-    orderBy: 'startTime',
+    singleEvents: "true",
+    orderBy: "startTime",
     timeMin,
     timeMax,
-    maxResults: '10',
-    fields: 'items(summary,description,location,start)',
+    maxResults: "10",
+    fields: "items(summary,description,location,start)",
   });
 
-  const response = await fetch(
-    `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events?${searchParams.toString()}`,
-    {
-      cache: 'no-store',
-    },
-  );
+  let response: Response;
+
+  try {
+    response = await fetch(
+      `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events?${searchParams.toString()}`,
+      {
+        cache: "no-store",
+        signal: AbortSignal.timeout(10000),
+      },
+    );
+  } catch {
+    return Response.json(
+      { error: "Unable to reach Google Calendar right now." },
+      { status: 502 },
+    );
+  }
 
   if (!response.ok) {
-    const errorText = await response.text();
-
-    return NextResponse.json(
+    return Response.json(
       {
         error: `Google Calendar API request failed: ${response.status} ${response.statusText}`,
-        details: errorText,
       },
       { status: response.status },
     );
   }
 
-  const payload = (await response.json()) as { items?: GoogleCalendarItem[] };
+  let payload: { items?: GoogleCalendarItem[] };
+
+  try {
+    payload = (await response.json()) as { items?: GoogleCalendarItem[] };
+  } catch {
+    return Response.json(
+      { error: "Google Calendar returned an invalid response." },
+      { status: 502 },
+    );
+  }
   const events = (payload.items ?? [])
     .map(mapCalendarItem)
     .filter((event): event is CalendarEvent => event !== null)
-    .slice(0, 5);
+    .slice(0, 10);
 
-  return NextResponse.json({ events });
+  return Response.json({ events });
 }

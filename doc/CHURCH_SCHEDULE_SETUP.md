@@ -1,552 +1,135 @@
-# Church Venue Rental Schedule System
+# Church Schedule Integration
 
-## Architecture Overview
+The website displays upcoming church services and events from a public Google
+Calendar. Google Calendar is the source of truth; there is no Supabase database
+or custom admin form in the current implementation.
 
-```
-Supabase (PostgreSQL DB + REST API)
-         ↓
-React Calendar Component (displays schedule)
-         ↓
-Website (visitor-facing)
+## Architecture
 
-+ Admin Panel (manage times via simple form)
-```
-
----
-
-## Part 1: Database Setup (Supabase)
-
-### Step 1: Create Supabase Project
-1. Go to [supabase.com](https://supabase.com) (free tier)
-2. Create a new project
-3. Get your **API URL** and **anon key** (you'll need these)
-
-### Step 2: Create Table
-
-In Supabase SQL Editor, run:
-
-```sql
-CREATE TABLE schedule (
-  id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-  event_date DATE NOT NULL,
-  event_type VARCHAR(50) NOT NULL, -- 'Sunday Worship' or 'Prayer Meeting'
-  start_time TIME NOT NULL,
-  end_time TIME NOT NULL,
-  notes TEXT,
-  created_at TIMESTAMP DEFAULT NOW()
-);
-
--- Enable RLS (Row Level Security)
-ALTER TABLE schedule ENABLE ROW LEVEL SECURITY;
-
--- Public read access (for website)
-CREATE POLICY "Allow public read" ON schedule
-  FOR SELECT USING (true);
-
--- Admin write access (you'll restrict this later with auth)
-CREATE POLICY "Allow authenticated write" ON schedule
-  FOR INSERT, UPDATE, DELETE
-  WITH CHECK (true);
+```text
+Google Calendar
+      |
+      v
+Next.js /api/calendar route
+      |
+      v
+ServiceCalendar component
+      |
+      +--> Homepage: next 5 events
+      +--> /calendar: next 10 events
 ```
 
-### Step 3: Add Sample Data
+The browser requests `/api/calendar`. The server route calls the Google
+Calendar API with the private API key, selects the event fields used by the
+site, and returns a normalized response:
 
-```sql
-INSERT INTO schedule (event_date, event_type, start_time, end_time, notes) VALUES
-  ('2026-03-29', 'Sunday Worship', '10:00:00', '11:30:00', 'Main service'),
-  ('2026-03-29', 'Prayer Meeting', '19:00:00', '20:00:00', 'Evening prayers'),
-  ('2026-04-05', 'Sunday Worship', '10:00:00', '11:30:00', NULL),
-  ('2026-04-12', 'Sunday Worship', '09:00:00', '10:30:00', 'Early service - rented to external group');
-```
-
----
-
-## Part 2: React Calendar Component
-
-### Dependencies
-```bash
-npm install @supabase/supabase-js react-big-calendar date-fns
-```
-
-### Code: `ScheduleCalendar.jsx`
-
-```jsx
-import React, { useState, useEffect } from 'react';
-import { createClient } from '@supabase/supabase-js';
-import { Calendar, momentLocalizer } from 'react-big-calendar';
-import { format, parse, startOfMonth, endOfMonth, eachDayOfInterval, isEqual, isSunday } from 'date-fns';
-import 'react-big-calendar/lib/css/react-big-calendar.css';
-import './ScheduleCalendar.css';
-
-// Initialize Supabase
-const supabase = createClient(
-  process.env.REACT_APP_SUPABASE_URL,
-  process.env.REACT_APP_SUPABASE_ANON_KEY
-);
-
-export default function ScheduleCalendar() {
-  const [schedule, setSchedule] = useState([]);
-  const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [hoveredDate, setHoveredDate] = useState(null);
-  const [selectedDateEvents, setSelectedDateEvents] = useState([]);
-
-  // Fetch schedule from Supabase
-  useEffect(() => {
-    fetchSchedule();
-  }, []);
-
-  const fetchSchedule = async () => {
-    const { data, error } = await supabase
-      .from('schedule')
-      .select('*')
-      .gte('event_date', format(startOfMonth(currentMonth), 'yyyy-MM-dd'))
-      .lte('event_date', format(endOfMonth(currentMonth), 'yyyy-MM-dd'));
-
-    if (error) {
-      console.error('Error fetching schedule:', error);
-    } else {
-      setSchedule(data || []);
+```json
+{
+  "events": [
+    {
+      "title": "Sunday Worship",
+      "date": "2026-09-20T10:00:00+02:00",
+      "time": "10:00 AM",
+      "category": "Church",
+      "description": "",
+      "location": "Geneva"
     }
-  };
-
-  // Get events for a specific date
-  const getEventsForDate = (date) => {
-    const dateStr = format(date, 'yyyy-MM-dd');
-    return schedule.filter(event => event.event_date === dateStr);
-  };
-
-  // Render calendar with Sundays highlighted
-  const renderCalendar = () => {
-    const monthStart = startOfMonth(currentMonth);
-    const monthEnd = endOfMonth(currentMonth);
-    const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
-
-    return (
-      <div className="calendar-grid">
-        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-          <div key={day} className="calendar-day-header">{day}</div>
-        ))}
-
-        {daysInMonth.map(day => {
-          const events = getEventsForDate(day);
-          const isSundayDate = isSunday(day);
-          const isHovered = hoveredDate && isEqual(format(hoveredDate, 'yyyy-MM-dd'), format(day, 'yyyy-MM-dd'));
-
-          return (
-            <div
-              key={day.toISOString()}
-              className={`calendar-day ${isSundayDate ? 'sunday' : ''} ${isHovered ? 'hovered' : ''} ${events.length > 0 ? 'has-events' : ''}`}
-              onMouseEnter={() => setHoveredDate(day)}
-              onMouseLeave={() => setHoveredDate(null)}
-            >
-              <div className="day-number">{format(day, 'd')}</div>
-              
-              {isHovered && events.length > 0 && (
-                <div className="events-tooltip">
-                  {events.map(event => (
-                    <div key={event.id} className="event-item">
-                      <div className="event-type">{event.event_type}</div>
-                      <div className="event-time">
-                        {format(parse(event.start_time, 'HH:mm:ss', new Date()), 'h:mm a')} - 
-                        {format(parse(event.end_time, 'HH:mm:ss', new Date()), 'h:mm a')}
-                      </div>
-                      {event.notes && <div className="event-notes">{event.notes}</div>}
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Indicator dot when events exist */}
-              {events.length > 0 && !isHovered && (
-                <div className="event-indicator"></div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-    );
-  };
-
-  return (
-    <div className="schedule-calendar">
-      <div className="calendar-header">
-        <h2>Venue Availability</h2>
-        <div className="month-nav">
-          <button onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1))}>
-            ← Previous
-          </button>
-          <span>{format(currentMonth, 'MMMM yyyy')}</span>
-          <button onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1))}>
-            Next →
-          </button>
-        </div>
-      </div>
-
-      {renderCalendar()}
-
-      <div className="legend">
-        <div className="legend-item">
-          <div className="legend-dot"></div>
-          <span>Scheduled events - hover to view times</span>
-        </div>
-      </div>
-    </div>
-  );
+  ]
 }
 ```
 
-### Styles: `ScheduleCalendar.css`
+The route is implemented in `frontend/src/app/api/calendar/route.ts`. The UI
+is implemented in `frontend/src/app/components/ServiceCalendar.tsx`, and the
+full calendar page is `frontend/src/app/calendar/page.tsx`.
 
-```css
-.schedule-calendar {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 2rem;
-  font-family: 'Georgia', serif;
-}
+## Google Cloud Setup
 
-.calendar-header {
-  text-align: center;
-  margin-bottom: 2rem;
-}
+1. Create or select a project in [Google Cloud Console](https://console.cloud.google.com/).
+2. Enable the Google Calendar API for that project.
+3. Create an API key under **APIs & Services > Credentials**.
+4. Restrict the key to the Google Calendar API. If HTTP referrer restrictions
+   are used, add the local and deployed site domains.
+5. Make the source calendar publicly readable. This integration uses an API
+   key and does not sign users into Google.
+6. Copy the calendar ID from Google Calendar's **Settings and sharing** page.
 
-.calendar-header h2 {
-  font-size: 2rem;
-  color: #1a3a3a;
-  margin-bottom: 1rem;
-}
+## Environment Variables
 
-.month-nav {
-  display: flex;
-  justify-content: center;
-  gap: 2rem;
-  align-items: center;
-  font-size: 1.1rem;
-  color: #666;
-}
+Create `frontend/.env.local` for local development:
 
-.month-nav button {
-  padding: 0.5rem 1rem;
-  border: 1px solid #ccc;
-  background: #f9f9f9;
-  cursor: pointer;
-  border-radius: 4px;
-  transition: all 0.3s;
-}
-
-.month-nav button:hover {
-  background: #e8e8e8;
-  border-color: #999;
-}
-
-/* Calendar Grid */
-.calendar-grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 1px;
-  background: #ddd;
-  border: 1px solid #ddd;
-  margin-bottom: 2rem;
-}
-
-.calendar-day-header {
-  background: #2c5aa0;
-  color: white;
-  padding: 1rem;
-  text-align: center;
-  font-weight: bold;
-  font-size: 0.9rem;
-}
-
-.calendar-day {
-  background: white;
-  min-height: 120px;
-  padding: 0.75rem;
-  position: relative;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  border: 1px solid #eee;
-}
-
-.calendar-day:hover {
-  background: #f5f5f5;
-}
-
-.calendar-day.sunday {
-  background: #f0f4f8;
-}
-
-.calendar-day.hovered {
-  background: #e3f2fd;
-  border: 2px solid #2c5aa0;
-  z-index: 10;
-}
-
-.calendar-day.has-events .day-number {
-  font-weight: bold;
-  color: #2c5aa0;
-}
-
-.day-number {
-  font-weight: 600;
-  font-size: 1rem;
-  color: #333;
-  margin-bottom: 0.5rem;
-}
-
-/* Hover Tooltip */
-.events-tooltip {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  background: white;
-  border: 2px solid #2c5aa0;
-  border-radius: 6px;
-  padding: 1rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  z-index: 20;
-  min-width: 280px;
-  margin-top: 0.5rem;
-}
-
-.event-item {
-  padding: 0.75rem 0;
-  border-bottom: 1px solid #eee;
-}
-
-.event-item:last-child {
-  border-bottom: none;
-}
-
-.event-type {
-  font-weight: bold;
-  color: #2c5aa0;
-  font-size: 0.95rem;
-  margin-bottom: 0.25rem;
-}
-
-.event-time {
-  color: #666;
-  font-size: 0.9rem;
-  font-family: 'Monaco', monospace;
-}
-
-.event-notes {
-  color: #999;
-  font-size: 0.85rem;
-  font-style: italic;
-  margin-top: 0.25rem;
-}
-
-/* Event Indicator Dot */
-.event-indicator {
-  position: absolute;
-  bottom: 6px;
-  right: 6px;
-  width: 6px;
-  height: 6px;
-  background: #2c5aa0;
-  border-radius: 50%;
-}
-
-/* Legend */
-.legend {
-  text-align: center;
-  padding: 1rem;
-  background: #f9f9f9;
-  border-radius: 4px;
-  border-left: 4px solid #2c5aa0;
-}
-
-.legend-item {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
-}
-
-.legend-dot {
-  width: 8px;
-  height: 8px;
-  background: #2c5aa0;
-  border-radius: 50%;
-}
-```
-
----
-
-## Part 3: Environment Variables
-
-Create `.env.local`:
-
-```
-REACT_APP_SUPABASE_URL=https://your-project.supabase.co
-REACT_APP_SUPABASE_ANON_KEY=your_anon_key_here
-```
-
-Get these from Supabase → Settings → API
-
----
-
-## Part 4: Admin Panel (Simple Form)
-
-Create `AdminScheduleForm.jsx`:
-
-```jsx
-import React, { useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
-import { format } from 'date-fns';
-
-const supabase = createClient(
-  process.env.REACT_APP_SUPABASE_URL,
-  process.env.REACT_APP_SUPABASE_ANON_KEY
-);
-
-export default function AdminScheduleForm() {
-  const [formData, setFormData] = useState({
-    event_date: format(new Date(), 'yyyy-MM-dd'),
-    event_type: 'Sunday Worship',
-    start_time: '10:00',
-    end_time: '11:30',
-    notes: '',
-  });
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState('');
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setMessage('');
-
-    const { error } = await supabase
-      .from('schedule')
-      .insert([{
-        event_date: formData.event_date,
-        event_type: formData.event_type,
-        start_time: formData.start_time + ':00',
-        end_time: formData.end_time + ':00',
-        notes: formData.notes || null,
-      }]);
-
-    if (error) {
-      setMessage(`Error: ${error.message}`);
-    } else {
-      setMessage('✓ Schedule added successfully!');
-      setFormData({
-        event_date: format(new Date(), 'yyyy-MM-dd'),
-        event_type: 'Sunday Worship',
-        start_time: '10:00',
-        end_time: '11:30',
-        notes: '',
-      });
-    }
-    setLoading(false);
-  };
-
-  return (
-    <div className="admin-form">
-      <h2>Add Scheduled Event</h2>
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label>Date</label>
-          <input
-            type="date"
-            name="event_date"
-            value={formData.event_date}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        <div className="form-group">
-          <label>Event Type</label>
-          <select name="event_type" value={formData.event_type} onChange={handleChange}>
-            <option>Sunday Worship</option>
-            <option>Prayer Meeting</option>
-            <option>Other</option>
-          </select>
-        </div>
-
-        <div className="form-row">
-          <div className="form-group">
-            <label>Start Time</label>
-            <input
-              type="time"
-              name="start_time"
-              value={formData.start_time}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label>End Time</label>
-            <input
-              type="time"
-              name="end_time"
-              value={formData.end_time}
-              onChange={handleChange}
-              required
-            />
-          </div>
-        </div>
-
-        <div className="form-group">
-          <label>Notes (optional)</label>
-          <input
-            type="text"
-            name="notes"
-            placeholder="e.g., Rented to external group"
-            value={formData.notes}
-            onChange={handleChange}
-          />
-        </div>
-
-        <button type="submit" disabled={loading}>
-          {loading ? 'Saving...' : 'Add Event'}
-        </button>
-
-        {message && <div className="message">{message}</div>}
-      </form>
-    </div>
-  );
-}
-```
-
----
-
-## Deployment Guide
-
-### Frontend (Deploy to Vercel - free)
 ```bash
-npm install -g vercel
-vercel
+GOOGLE_CALENDAR_ID=your_calendar_id
+GOOGLE_CALENDAR_API_KEY=your_google_api_key
 ```
 
-Follow prompts, add your `.env.local` variables in Vercel dashboard.
-If you deploy through GitHub Actions, add `VERCEL_TOKEN`, `VERCEL_ORG_ID`, and `VERCEL_PROJECT_ID` as repository secrets.
+The variables are read only by the Next.js server route. Do not rename them to
+`NEXT_PUBLIC_*`, expose the API key in client code, commit `.env.local`, or
+paste a real key into documentation. The local env file is ignored by git.
 
-### Admin Panel (Protect with auth)
-For production, add Supabase Auth:
-1. Enable Email auth in Supabase dashboard
-2. Wrap AdminScheduleForm with authentication check
-3. Use `supabase.auth.onAuthStateChange()` to protect the form
+For Vercel, add both variables to the Preview and Production environments in
+the project settings. Rotate the key if it has been exposed in source,
+terminal output, chat, or logs.
 
----
+## Runtime Behavior
 
-## Summary: Tech Stack
+The API route:
 
-| Component | Tool | Cost | Why |
-|-----------|------|------|-----|
-| Database | Supabase | Free (generous tier) | Auto REST API, real-time, PostgreSQL |
-| Frontend | React | Free | Modern, component-based |
-| Calendar | Custom (date-fns) | Free | Lightweight, customizable |
-| Hosting | Vercel | Free | Automatic builds, great DX |
-| Admin | Supabase UI / Custom Form | Free | No-code or simple form |
+- Requests events from 24 hours before the current time through 180 days ahead.
+- Requests single events ordered by start time.
+- Returns at most 10 events.
+- Includes timed and all-day events.
+- Formats timed events in the `Europe/Zurich` timezone.
+- Uses `TBA` when an event has no location and `Untitled event` when it has no title.
+- Returns an error when credentials are missing, Google cannot be reached, the
+  Google request fails, or Google returns invalid JSON.
 
----
+The `ServiceCalendar` component shows loading placeholders while it fetches,
+an error message with a **Try again** action when the request fails, and an
+empty state when no events are available. The homepage uses the default limit
+of five events. The dedicated `/calendar` page passes `limit={10}`.
+
+## Local Development
+
+From the repository root:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000). The calendar is visible
+in the homepage's **Service Times** section and at
+[http://localhost:3000/calendar](http://localhost:3000/calendar).
+
+Useful checks before deployment:
+
+```bash
+npm run lint
+npm run build
+```
+
+To test the API directly while the development server is running:
+
+```bash
+curl http://localhost:3000/api/calendar
+```
+
+## Deployment
+
+The frontend is a Next.js application intended for Vercel. Deploy the
+`frontend` directory, configure `GOOGLE_CALENDAR_ID` and
+`GOOGLE_CALENDAR_API_KEY` in the Vercel project, and verify `/api/calendar`
+after deployment.
+
+The API key must remain server-side. If a browser-restricted key is used,
+configure the deployed site's allowed referrers in Google Cloud.
+
+## Current Limitations
+
+- There is no schedule-management or admin panel in the application.
+- Events are managed in Google Calendar.
+- The API returns only the first 10 events in its time window.
+- The UI currently displays the event start time, not an end time.
+- The integration does not use Supabase, `react-big-calendar`, or a custom
+  month-grid schedule component.

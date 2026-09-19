@@ -1,18 +1,18 @@
 {
-  "name": "Church Website (Next.js + Sanity)",
+  "name": "Church Website (Next.js)",
   "image": "mcr.microsoft.com/devcontainers/javascript-node:22",
 
   "features": {
     "ghcr.io/devcontainers/features/git:1": {}
   },
 
-  "forwardPorts": [3000, 3333],
+  "forwardPorts": [3000],
   "portsAttributes": {
-    "3000": { "label": "Next.js" },
-    "3333": { "label": "Sanity Studio" }
+    "3000": { "label": "Next.js", "onAutoForward": "openBrowser" }
   },
 
-  "postCreateCommand": "npm install",
+  "postCreateCommand": "npm install && rm -rf frontend/node_modules && npm install --prefix frontend",
+  "postStartCommand": "nohup npm run dev --prefix frontend -- --hostname 0.0.0.0 > /tmp/nextjs.log 2>&1 &",
 
   "customizations": {
     "vscode": {
