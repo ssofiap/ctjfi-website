@@ -6,6 +6,10 @@ type GoogleCalendarItem = {
     dateTime?: string;
     date?: string;
   };
+  end?: {
+    dateTime?: string;
+    date?: string;
+  };
 };
 
 const CALENDAR_TIME_ZONE = "Europe/Zurich";
@@ -13,6 +17,7 @@ const CALENDAR_TIME_ZONE = "Europe/Zurich";
 type CalendarEvent = {
   title: string;
   date: string;
+  endDate?: string;
   time: string;
   category: string;
   description: string;
@@ -41,10 +46,22 @@ function mapCalendarItem(item: GoogleCalendarItem): CalendarEvent | null {
   }
 
   const date = item.start?.dateTime ?? `${startValue}T00:00:00`;
+  let endDate: string | undefined;
+
+  if (item.end?.dateTime) {
+    endDate = item.end.dateTime;
+  } else if (item.end?.date) {
+    endDate = new Date(
+      new Date(`${item.end.date}T00:00:00Z`).getTime() - 24 * 60 * 60 * 1000,
+    )
+      .toISOString()
+      .slice(0, 10);
+  }
 
   return {
     title: item.summary ?? "Untitled event",
     date,
+    endDate,
     time: item.start?.dateTime ? formatTime(item.start.dateTime) : "All day",
     category: "Church",
     description: item.description ?? "",
@@ -80,7 +97,7 @@ export async function GET() {
     timeMin,
     timeMax,
     maxResults: "10",
-    fields: "items(summary,description,location,start)",
+    fields: "items(summary,description,location,start,end)",
   });
 
   let response: Response;

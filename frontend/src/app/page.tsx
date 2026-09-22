@@ -81,27 +81,26 @@ export default function Home() {
               Worship
             </h3>
             <p className="text-gray-600 text-sm transition-colors duration-300">
-              Gathering together to praise God and grow deeper in our spiritual
+              Gathering together as a congregation to praise God and grow deeper in our spiritual
               journey.
             </p>
           </div>
         </div>
 
         <div id="location" className="mt-32 max-w-4xl w-full">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-normal text-black mb-4">Visit Us</h2>
-            <p className="text-gray-600 font-light">
-              Join us for worship and fellowship
-            </p>
-          </div>
+          <div className="grid grid-cols-1 items-start gap-8 md:grid-cols-[200px_minmax(0,1fr)]">
+            <div className="text-center md:pt-8 md:text-left">
+              <h2 className="text-3xl font-normal text-black mb-4">Visit Us</h2>
+            </div>
 
-          <div className="bg-white rounded-lg overflow-hidden p-8 transition-all duration-300 ease-in-out hover:shadow-lg hover:scale-105 cursor-default">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-              <div className="text-left space-y-4">
+            <div className="bg-white rounded-lg overflow-hidden p-8 transition-all duration-300 ease-in-out hover:shadow-lg hover:scale-105 cursor-default">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                <div className="text-left space-y-4">
                 <div>
                   <p className="text-gray-700 font-normal mb-6">
                     Chemin Rieu 3,<br></br>1208 Geneva, Switzerland
                   </p>
+                  <p className="text-gray-700 font-normal mb-1">Limited parking space onsite!</p>
                 </div>
 
                 <div>
@@ -124,32 +123,33 @@ export default function Home() {
                     Get Directions
                   </a>
                 </div>
-              </div>
+                </div>
 
-              <div className="aspect-square w-full rounded-lg overflow-hidden">
-                <iframe
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3344.3215266260854!2d6.163555576866016!3d46.19528877109523!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x478c7bd30d3182ef%3A0xe48dd26eb81d5b69!2sCTJFI%20(Come%20to%20Jesus%20Fellowship%20International)!5e1!3m2!1sen!2sch!4v1774604551112!5m2!1sen!2sch"
-                  width="100%"
-                  height="100%"
-                  style={{ border: 0 }}
-                  allowFullScreen
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                  title="Church Location"
-                />
+                <div className="aspect-square w-full rounded-lg overflow-hidden">
+                  <iframe
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3344.3215266260854!2d6.163555576866016!3d46.19528877109523!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x478c7bd30d3182ef%3A0xe48dd26eb81d5b69!2sCTJFI%20(Come%20to%20Jesus%20Fellowship%20International)!5e1!3m2!1sen!2sch!4v1774604551112!5m2!1sen!2sch"
+                    width="100%"
+                    height="100%"
+                    style={{ border: 0 }}
+                    allowFullScreen
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    title="Church Location"
+                  />
+                </div>
               </div>
             </div>
           </div>
         </div>
 
         <div id="calendar" className="mt-32 max-w-4xl w-full">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-normal text-black mb-4">
-              Service Times
-            </h2>
-          </div>
+          <div className="grid grid-cols-1 items-start gap-8 md:grid-cols-[200px_minmax(0,1fr)]">
+            <div className="text-center md:pt-8">
+              <h2 className="text-3xl font-normal text-black mb-4">Services & Events</h2>
+            </div>
 
-          <ServiceCalendar />
+            <ServiceCalendar />
+          </div>
         </div>
       </main>
 

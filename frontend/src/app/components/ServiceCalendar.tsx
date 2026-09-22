@@ -8,6 +8,7 @@ import { format, parseISO } from "date-fns";
 type CalendarEvent = {
   title: string;
   date: string;
+  endDate?: string;
   time: string;
   category: string;
   description: string;
@@ -87,7 +88,7 @@ export default function ServiceCalendar({ limit = 5 }: ServiceCalendarProps) {
     <Card className="overflow-hidden border-0 bg-white shadow-none">
       <CardContent className="p-0">
         <div className="p-6 sm:p-8">
-          <div className="mt-4 space-y-3">
+          <div className="mt-4 grid gap-5">
             {loading ? (
               Array.from({ length: 3 }).map((_, index) => (
                 <article
@@ -122,14 +123,20 @@ export default function ServiceCalendar({ limit = 5 }: ServiceCalendarProps) {
             ) : (
               upcomingEvents.map((event) => {
                 const eventDate = parseISO(event.date);
+                const eventEndDate = event.endDate
+                  ? parseISO(event.endDate)
+                  : eventDate;
+                const hasDateRange =
+                  format(eventEndDate, "yyyy-MM-dd") !==
+                  format(eventDate, "yyyy-MM-dd");
 
                 return (
                   <article
                     key={`${event.title}-${event.date}`}
-                    className="group cursor-default rounded-lg bg-white p-8 transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-lg"
+                    className="group w-full cursor-default rounded-lg bg-white p-8 transition-all duration-300 ease-in-out hover:shadow-lg hover:scale-105"
                   >
-                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                      <div className="space-y-1">
+                    <div className="grid grid-cols-1 gap-3 md:min-h-14 md:grid-cols-[160px_100px_minmax(0,1fr)] md:items-start md:gap-4">
+                      <div className="min-w-0 space-y-1 break-words">
                         <h4 className="text-base font-light tracking-tight text-slate-900">
                           {event.title}
                         </h4>
@@ -138,27 +145,24 @@ export default function ServiceCalendar({ limit = 5 }: ServiceCalendarProps) {
                         </p>
                       </div>
 
-                      <div className="flex shrink-0 items-start gap-3 rounded-lg bg-white px-4 py-3 text-left">
-                        <div className="text-center leading-none">
-                          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">
-                            {format(eventDate, "EEE")}
-                          </p>
-                          <p className="text-2xl font-light leading-none text-slate-900">
-                            {format(eventDate, "d")}
-                          </p>
+                      <div className="leading-tight">
+                        <p className="text-sm font-medium text-slate-900">
+                          {hasDateRange
+                            ? `${format(eventDate, "EEE, MMM d")} - ${format(eventEndDate, "EEE, MMM d")}`
+                            : format(eventDate, "EEE, MMM d")}
+                        </p>
+                      </div>
+
+                      <div className="space-y-1 text-sm font-light leading-5 text-slate-600">
+                        <div className="flex items-center gap-2">
+                          <Clock3 className="h-4 w-4 text-slate-500" />
+                          <span className="leading-none">{event.time}</span>
                         </div>
-                        <div className="h-10 w-px bg-slate-200" />
-                        <div className="space-y-1 text-sm font-light leading-5 text-slate-600">
-                          <div className="flex items-center gap-2">
-                            <Clock3 className="h-4 w-4 text-slate-500" />
-                            <span className="leading-none">{event.time}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <MapPin className="h-4 w-4 text-slate-500" />
-                            <span className="leading-none">
-                              {event.location}
-                            </span>
-                          </div>
+                        <div className="flex items-center gap-2">
+                          <MapPin className="h-4 w-4 text-slate-500" />
+                          <span className="leading-none">
+                            {event.location}
+                          </span>
                         </div>
                       </div>
                     </div>
