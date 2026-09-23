@@ -84,6 +84,7 @@ export default function Navigation() {
               md:hover:scale-105">
             Events
           </Link>
+
           <Link href="/contact" onClick={closeMenu}
             className="
               w-full rounded-md px-4 py-3
@@ -109,6 +110,7 @@ export default function Navigation() {
               md:hover:scale-105">
             About Us
           </Link>
+
           <Link href="/donate" onClick={closeMenu}
             className="
             w-full rounded-md px-4 py-3
@@ -122,15 +124,16 @@ export default function Navigation() {
             Donate
           </Link>
           
-          <div className="mt-auto flex flex-row items-center gap-6 md:mt-0 md:ml-4 md:pl-4 md:border-l md:border-gray-300">
+          <div className="mt-auto flex flex-row items-center gap-6
+          md:mt-0 md:ml-4 md:pl-4 md:border-l md:border-gray-300">
               <a 
                 href="https://www.youtube.com/@ctjfichurch.com" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="
-                  text-black hover:text-red-600 transition-all duration-300 ease-in-out 
-                  hover:scale-110 active:scale-95
-                  md: "
+                  text-black hover:text-red-600 transition-all
+                  duration-300 ease-in-out 
+                  hover:scale-110 active:scale-95"
                 aria-label="YouTube"
               >
                 <svg className="w-6 h-6 md:w-4 md:h-4" fill="currentColor" viewBox="0 0 24 24">
@@ -143,7 +146,8 @@ export default function Navigation() {
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="
-                  text-black hover:text-pink-600 transition-all duration-300 ease-in-out
+                  text-black hover:text-pink-600
+                  transition-all duration-300 ease-in-out
                   hover:scale-110 active:scale-95"
                 aria-label="Instagram"
               >
@@ -157,7 +161,8 @@ export default function Navigation() {
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="
-                  text-black hover:text-blue-600 transition-all duration-300 ease-in-out
+                  text-black hover:text-blue-600
+                  transition-all duration-300 ease-in-out
                   hover:scale-110 active:scale-95"
                 aria-label="Facebook"
               >
