@@ -48,9 +48,9 @@ jobs:
         uses: reviewdog/action-actionlint@v1.45.0
 
       - name: Scan repository config with Trivy
-        uses: aquasecurity/trivy-action@v0.31.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
-          trivy-version: '0.63.0'
+          version: 'v0.70.0'
           scan-type: config
           scan-ref: .
           severity: HIGH,CRITICAL
