@@ -10,7 +10,7 @@ export default function Navigation() {
 
   return (
     <nav className="w-full bg-white sticky top-0 z-50 shadow-sm">
-      <div className="max-w-7xl mx-auto px-6 py-4">
+      <div className="max-w-7xl mx-auto px-6 py-5">
         <div className="relative z-50 flex font-light items-center justify-between md:justify-center gap-8">
           <Link href="/" onClick={closeMenu}
             className="text-black text-sm font-semibold">
@@ -44,8 +44,8 @@ export default function Navigation() {
             href="/sermons"
             onClick={closeMenu}
             className="
-              w-full rounded-md px-4 py-3
-              text-base font-light text-xl
+              w-full rounded-md px-4 py-5
+              font-light text-4xl
               transition-all duration-300 ease-in-out
               hover:text-blue-600
               md:w-auto md:px-0 md:py-0
@@ -57,8 +57,8 @@ export default function Navigation() {
 
           <Link href="/calendar" onClick={closeMenu}
             className="
-              w-full rounded-md px-4 py-3
-              text-base font-light text-xl
+              w-full rounded-md px-4 py-5
+              font-light text-4xl
               transition-all duration-300 ease-in-out
               hover:text-blue-600
               md:w-auto md:px-0 md:py-0
@@ -70,8 +70,8 @@ export default function Navigation() {
 
           <Link href="/events" onClick={closeMenu}
             className="
-              w-full rounded-md px-4 py-3
-              text-base font-light text-xl
+              w-full rounded-md px-4 py-5
+              font-light text-4xl
               transition-all duration-300 ease-in-out
               hover:text-blue-600
               md:w-auto md:px-0 md:py-0
@@ -83,8 +83,8 @@ export default function Navigation() {
 
           <Link href="/contact" onClick={closeMenu}
             className="
-              w-full rounded-md px-4 py-3
-              text-base font-light text-xl
+              w-full rounded-md px-4 py-5
+              font-light text-4xl
               transition-all duration-300 ease-in-out
               hover:text-blue-600
               md:w-auto md:px-0 md:py-0
@@ -96,8 +96,8 @@ export default function Navigation() {
 
           <Link href="/about" onClick={closeMenu}
             className="
-              w-full rounded-md px-4 py-3
-              text-base font-light text-xl
+              w-full rounded-md px-4 py-5
+              font-light text-4xl
               transition-all duration-300 ease-in-out
               hover:text-blue-600
               md:w-auto md:px-0 md:py-0
@@ -109,8 +109,8 @@ export default function Navigation() {
 
           <Link href="/donate" onClick={closeMenu}
             className="
-            w-full rounded-md px-4 py-3
-              text-base font-light text-xl
+            w-full rounded-md px-4 py-5
+              font-light text-4xl
               transition-all duration-300 ease-in-out
               hover:text-blue-600
               md:w-auto md:px-0 md:py-0
