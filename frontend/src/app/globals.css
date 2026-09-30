@@ -109,6 +109,91 @@ body {
   transform: rotate(-45deg);
 }
 
+.mobile-navigation {
+  clip-path: inset(0 0 100% 0);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-1.5rem);
+  visibility: hidden;
+  transition:
+    clip-path 0.55s cubic-bezier(0.77, 0, 0.175, 1),
+    opacity 0.35s ease,
+    transform 0.55s cubic-bezier(0.77, 0, 0.175, 1),
+    visibility 0s linear 0.55s;
+}
+
+.mobile-navigation.is-open {
+  clip-path: inset(0);
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+  visibility: visible;
+}
+
+.mobile-navigation > a,
+.mobile-navigation > div {
+  opacity: 0;
+  transform: translateY(1.25rem);
+  transition:
+    opacity 0.35s ease,
+    transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.mobile-navigation.is-open > a,
+.mobile-navigation.is-open > div {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.mobile-navigation.is-open > a:nth-child(1) {
+  transition-delay: 0.12s;
+}
+
+.mobile-navigation.is-open > a:nth-child(2) {
+  transition-delay: 0.16s;
+}
+
+.mobile-navigation.is-open > a:nth-child(3) {
+  transition-delay: 0.2s;
+}
+
+.mobile-navigation.is-open > a:nth-child(4) {
+  transition-delay: 0.24s;
+}
+
+.mobile-navigation.is-open > a:nth-child(5) {
+  transition-delay: 0.28s;
+}
+
+.mobile-navigation.is-open > a:nth-child(6) {
+  transition-delay: 0.32s;
+}
+
+.mobile-navigation.is-open > div {
+  transition-delay: 0.36s;
+}
+
+@media (min-width: 768px) {
+  .mobile-navigation,
+  .mobile-navigation.is-open {
+    clip-path: none;
+    opacity: 1;
+    pointer-events: auto;
+    transform: none;
+    visibility: visible;
+    transition: none;
+  }
+
+  .mobile-navigation > a,
+  .mobile-navigation > div,
+  .mobile-navigation.is-open > a,
+  .mobile-navigation.is-open > div {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
 @keyframes typewriter-blink {
   50% {
     opacity: 0;

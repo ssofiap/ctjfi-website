@@ -32,16 +32,12 @@ export default function Navigation() {
           
           <div
             id="mobile-navigation"
-            className=
-              {`
-                ${isMenuOpen ? 'flex' : 'hidden'}
-                fixed inset-0 z-30 flex-col justify-between
-                border-t border-gray-200 bg-white
-                px-6 py-6 shadow-sm
-                md:static md:min-h-0 md:flex md:flex-row
-                md:items-center md:gap-8
-                md:border-0 md:bg-transparent md:p-0 md:shadow-none
-              `}
+            aria-hidden={!isMenuOpen}
+            className={`mobile-navigation fixed inset-0 z-30 flex flex-col justify-between
+              border-t border-gray-200 bg-white px-6 py-6 shadow-sm
+              md:static md:min-h-0 md:flex-row md:items-center md:gap-8
+              md:border-0 md:bg-transparent md:p-0 md:shadow-none
+              ${isMenuOpen ? 'is-open' : ''}`}
           >
             
           <Link
