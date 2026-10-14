@@ -19,7 +19,204 @@ html {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+}
+
+.typewriter-cursor {
+  display: inline-block;
+  margin-left: 0.15em;
+  animation: typewriter-blink 0.8s steps(1, end) infinite;
+}
+
+.hamburger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  padding: 0;
+  color: #000;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+@media (min-width: 768px) {
+  .hamburger {
+    display: none;
+  }
+}
+
+.hamburger-box {
+  position: relative;
+  display: inline-block;
+  width: 1.5rem;
+  height: 1.25rem;
+}
+
+.hamburger-inner,
+.hamburger-inner::before,
+.hamburger-inner::after {
+  position: absolute;
+  display: block;
+  width: 1.5rem;
+  height: 1.1px;
+  background-color: currentColor;
+  border-radius: 999px;
+}
+
+.hamburger-inner {
+  top: 0.625rem;
+  transition: background-color 0s 0.13s linear;
+}
+
+.hamburger-inner::before,
+.hamburger-inner::after {
+  content: "";
+  left: 0;
+  transition: transform 0.13s cubic-bezier(0.55, 0.055, 0.675, 0.19), top 0.1s 0.2s ease-in;
+}
+
+.hamburger-inner::before {
+  top: -0.625rem;
+}
+
+.hamburger-inner::after {
+  top: 0.625rem;
+}
+
+.hamburger--spring.is-active .hamburger-inner {
+  background-color: transparent;
+  transition-delay: 0.22s;
+}
+
+.hamburger--spring.is-active .hamburger-inner::before,
+.hamburger--spring.is-active .hamburger-inner::after {
+  top: 0;
+  transition: top 0.1s 0.15s ease-out, transform 0.13s 0.22s cubic-bezier(0.215, 0.61, 0.355, 1);
+}
+
+.hamburger--spring.is-active .hamburger-inner::before {
+  transform: rotate(45deg);
+}
+
+.hamburger--spring.is-active .hamburger-inner::after {
+  transform: rotate(-45deg);
+}
+
+.mobile-navigation {
+  display: flex;
+  clip-path: inset(0 0 100% 0);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-1.5rem);
+  visibility: hidden;
+  transition:
+    clip-path 0.55s cubic-bezier(0.77, 0, 0.175, 1),
+    opacity 0.35s ease,
+    transform 0.55s cubic-bezier(0.77, 0, 0.175, 1),
+    visibility 0s linear 0.55s;
+}
+
+.mobile-navigation.is-open {
+  display: flex;
+  clip-path: inset(0);
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+  visibility: visible;
+  animation: mobile-navigation-open 0.55s cubic-bezier(0.77, 0, 0.175, 1);
+  transition: visibility 0s linear 0s;
+}
+
+.mobile-navigation > a,
+.mobile-navigation > div {
+  opacity: 0;
+  transform: translateY(1.25rem);
+  transition:
+    opacity 0.35s ease,
+    transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.mobile-navigation.is-open > a,
+.mobile-navigation.is-open > div {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.mobile-navigation.is-open > a:nth-child(1) {
+  transition-delay: 0.12s;
+}
+
+.mobile-navigation.is-open > a:nth-child(2) {
+  transition-delay: 0.16s;
+}
+
+.mobile-navigation.is-open > a:nth-child(3) {
+  transition-delay: 0.2s;
+}
+
+.mobile-navigation.is-open > a:nth-child(4) {
+  transition-delay: 0.24s;
+}
+
+.mobile-navigation.is-open > a:nth-child(5) {
+  transition-delay: 0.28s;
+}
+
+.mobile-navigation.is-open > a:nth-child(6) {
+  transition-delay: 0.32s;
+}
+
+.mobile-navigation.is-open > div {
+  transition-delay: 0.36s;
+}
+
+@media (min-width: 768px) {
+  .mobile-navigation,
+  .mobile-navigation.is-open {
+    display: flex;
+    clip-path: none;
+    opacity: 1;
+    pointer-events: auto;
+    transform: none;
+    visibility: visible;
+    transition: none;
+  }
+
+  .mobile-navigation > a,
+  .mobile-navigation > div,
+  .mobile-navigation.is-open > a,
+  .mobile-navigation.is-open > div {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+@keyframes typewriter-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes mobile-navigation-open {
+  from {
+    clip-path: inset(0 0 100% 0);
+    opacity: 0;
+    transform: translateY(-1.5rem);
+  }
+
+  to {
+    clip-path: inset(0);
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @layer base {
