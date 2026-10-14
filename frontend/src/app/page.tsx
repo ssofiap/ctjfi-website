@@ -117,7 +117,7 @@ export default function Home() {
 
         <div id="calendar" className="mt-32 max-w-4xl w-full">
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-normal text-black mb-4">Service Times</h2>
+            <h2 className="text-3xl font-normal text-black mb-4">Events & Services</h2>
           </div>
           
           <ServiceCalendar />
