@@ -1,9 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  turbopack: {
-    root: process.cwd(),
-  },
+  // Fast Refresh is enabled by default in Next.js
 };
 
 export default nextConfig;
