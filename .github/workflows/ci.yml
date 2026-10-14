@@ -5,6 +5,7 @@ on:
   push:
     branches:
     - main
+    - develop
     - 'feature/**'
     - 'hotfix/**'
 
@@ -62,7 +63,7 @@ jobs:
   calendar-integration:
     name: Calendar API integration
     needs: detect-calendar
-    if: needs.detect-calendar.outputs.present == 'true'
+    if: github.event_name != 'pull_request' && needs.detect-calendar.outputs.present == 'true'
     runs-on: ubuntu-latest
     defaults:
       run:
