@@ -36,6 +36,62 @@ jobs:
       - name: Build
         run: npm run build
 
+  calendar-integration:
+    name: Calendar API integration
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    env:
+      GOOGLE_CALENDAR_ID: ${{ secrets.GOOGLE_CALENDAR_ID }}
+      GOOGLE_CALENDAR_API_KEY: ${{ secrets.GOOGLE_CALENDAR_API_KEY }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build frontend
+        run: npm run build
+
+      - name: Start frontend
+        run: |
+          npm run start > /tmp/ctjfi-frontend.log 2>&1 &
+          echo $! > /tmp/ctjfi-frontend.pid
+
+      - name: Wait for frontend
+        run: |
+          for attempt in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:3000/calendar > /dev/null; then
+              exit 0
+            fi
+            sleep 2
+          done
+          cat /tmp/ctjfi-frontend.log
+          exit 1
+
+      - name: Test calendar API and frontend
+        run: |
+          curl --fail --silent --show-error http://127.0.0.1:3000/api/calendar > /tmp/calendar-response.json
+          node -e "const fs = require('fs'); const data = JSON.parse(fs.readFileSync('/tmp/calendar-response.json', 'utf8')); if (!Array.isArray(data.events)) { throw new Error('Calendar API response must contain an events array'); }"
+          curl --fail --silent --show-error http://127.0.0.1:3000/calendar | grep -q 'Calendar'
+
+      - name: Stop frontend
+        if: always()
+        run: |
+          if [ -f /tmp/ctjfi-frontend.pid ]; then
+            kill "$(cat /tmp/ctjfi-frontend.pid)" || true
+          fi
+
   config-security:
     name: Config and workflow security
     runs-on: ubuntu-latest
