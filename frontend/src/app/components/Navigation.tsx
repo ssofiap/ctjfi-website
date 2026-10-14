@@ -32,7 +32,6 @@ export default function Navigation() {
           
           <div
             id="mobile-navigation"
-            aria-hidden={!isMenuOpen}
             className={`mobile-navigation fixed inset-0 z-40 flex flex-col justify-between
               border-t border-gray-200 bg-white px-6 py-6 shadow-sm
               md:static md:min-h-0 md:flex md:flex-row md:items-center md:gap-8

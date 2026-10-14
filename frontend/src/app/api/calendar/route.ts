@@ -17,7 +17,9 @@ const CALENDAR_TIME_ZONE = "Europe/Zurich";
 type CalendarEvent = {
   title: string;
   date: string;
+  dateLabel: string;
   endDate?: string;
+  endDateLabel?: string;
   time: string;
   category: string;
   description: string;
@@ -38,6 +40,23 @@ function formatTime(value: string) {
   }).format(date);
 }
 
+function formatDate(value: string, dateOnly = false) {
+  const date = dateOnly
+    ? new Date(`${value}T12:00:00Z`)
+    : new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+
+  return new Intl.DateTimeFormat("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    timeZone: CALENDAR_TIME_ZONE,
+  }).format(date);
+}
+
 function mapCalendarItem(item: GoogleCalendarItem): CalendarEvent | null {
   const startValue = item.start?.dateTime ?? item.start?.date;
 
@@ -46,11 +65,23 @@ function mapCalendarItem(item: GoogleCalendarItem): CalendarEvent | null {
   }
 
   const date = item.start?.dateTime ?? `${startValue}T00:00:00`;
+  const dateLabel = formatDate(startValue, !item.start?.dateTime);
   let endDate: string | undefined;
+  let endDateLabel: string | undefined;
 
   if (item.end?.dateTime) {
     endDate = item.end.dateTime;
+    endDateLabel = formatDate(item.end.dateTime);
   } else if (item.end?.date) {
+    endDateLabel = formatDate(
+      new Date(
+        new Date(`${item.end.date}T00:00:00Z`).getTime() -
+          24 * 60 * 60 * 1000,
+      )
+        .toISOString()
+        .slice(0, 10),
+      true,
+    );
     endDate = new Date(
       new Date(`${item.end.date}T00:00:00Z`).getTime() - 24 * 60 * 60 * 1000,
     )
@@ -61,7 +92,9 @@ function mapCalendarItem(item: GoogleCalendarItem): CalendarEvent | null {
   return {
     title: item.summary ?? "Untitled event",
     date,
+    dateLabel,
     endDate,
+    endDateLabel,
     time: item.start?.dateTime ? formatTime(item.start.dateTime) : "All day",
     category: "Church",
     description: item.description ?? "",
@@ -85,7 +118,7 @@ export async function GET() {
   }
 
   const now = new Date();
-  const timeMin = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();
+  const timeMin = now.toISOString();
   const timeMax = new Date(
     now.getTime() + 180 * 24 * 60 * 60 * 1000,
   ).toISOString();

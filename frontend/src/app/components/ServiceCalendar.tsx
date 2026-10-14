@@ -3,12 +3,14 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent } from "./ui/card";
 import { Clock3, MapPin } from "lucide-react";
-import { format, parseISO } from "date-fns";
+import { parseISO } from "date-fns";
 
 type CalendarEvent = {
   title: string;
   date: string;
+  dateLabel: string;
   endDate?: string;
+  endDateLabel?: string;
   time: string;
   category: string;
   description: string;
@@ -122,13 +124,9 @@ export default function ServiceCalendar({ limit = 5 }: ServiceCalendarProps) {
               </div>
             ) : (
               upcomingEvents.map((event) => {
-                const eventDate = parseISO(event.date);
-                const eventEndDate = event.endDate
-                  ? parseISO(event.endDate)
-                  : eventDate;
                 const hasDateRange =
-                  format(eventEndDate, "yyyy-MM-dd") !==
-                  format(eventDate, "yyyy-MM-dd");
+                  event.endDateLabel !== undefined &&
+                  event.endDateLabel !== event.dateLabel;
 
                 return (
                   <article
@@ -148,8 +146,8 @@ export default function ServiceCalendar({ limit = 5 }: ServiceCalendarProps) {
                       <div className="leading-tight">
                         <p className="text-sm font-medium text-slate-900">
                           {hasDateRange
-                            ? `${format(eventDate, "EEE, MMM d")} - ${format(eventEndDate, "EEE, MMM d")}`
-                            : format(eventDate, "EEE, MMM d")}
+                            ? `${event.dateLabel} - ${event.endDateLabel}`
+                            : event.dateLabel}
                         </p>
                       </div>
 
