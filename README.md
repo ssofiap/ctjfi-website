@@ -14,15 +14,9 @@ HTML5, CSS3, React, Tailwind
 - **Backend**:
 To be defined.
 - **Hosting**:
-Vercel
+To be defined.
 - **Additional Tools**:
 Git(hub) for version control, Notion for issue tracking as well as project overview, Vercel for deployment
-
-### CI / CD
-- Pull requests run GitHub Actions checks in `frontend/`.
-- Vercel handles preview deploys for pull requests.
-- `main` deploys to production through Vercel.
-- If GitHub Actions is used for deploys, configure `VERCEL_TOKEN`, `VERCEL_ORG_ID`, and `VERCEL_PROJECT_ID` as repository secrets.
 
 ### License
 To be defined.

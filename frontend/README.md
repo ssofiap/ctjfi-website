@@ -16,30 +16,6 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-## Calendar Integration
-
-The service calendar reads from the Google Calendar API through the `/api/calendar` route.
-
-### Google Cloud setup
-
-1. Create or select a Google Cloud project.
-2. Enable the Google Calendar API.
-3. Create an API key and restrict it to the Google Calendar API.
-4. Make the source calendar publicly readable, since this integration uses an API key rather than user sign-in.
-
-Add these environment variables in `.env.local`:
-
-```bash
-GOOGLE_CALENDAR_ID=your_calendar_id
-GOOGLE_CALENDAR_API_KEY=your_google_api_key
-```
-
-The calendar must be public or otherwise accessible with the API key you provide.
-
-`.env.local` is ignored by git. Configure the same variables in Vercel for each Preview and Production environment. Do not expose the API key through `NEXT_PUBLIC_*` variables. For a browser-restricted key, add the deployed site domains to the allowed referrers in Google Cloud. Rotate any key that has been exposed in chat, logs, or committed files.
-
-The homepage shows the next five events. The `/calendar` page shows up to ten events returned by the API, covering the next 180 days. Timed events are displayed in the church's Europe/Zurich timezone.
-
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
