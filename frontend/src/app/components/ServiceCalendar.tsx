@@ -1,12 +1,8 @@
 'use client';
 
-import { useState } from 'react';
-import { Calendar } from './ui/calendar';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
 
 export default function ServiceCalendar() {
-  const [date, setDate] = useState<Date | undefined>(new Date());
-
   return (
     <div className="flex gap-8">
       <Card className="border-0 shadow-none hover:scale-105 hover:shadow-lg transition-all duration-300 flex-1">
