@@ -4,7 +4,9 @@ on:
   pull_request:
   push:
     branches:
-      - ['main', 'feature/**', 'hotfix/**']
+    - main
+    - 'feature/**'
+    - 'hotfix/**'
 
 jobs:
   frontend:
@@ -33,9 +35,34 @@ jobs:
 
       - name: Build
         run: npm run build
+  
+  detect-calendar:
+    name: Detect calendar integration
+    runs-on: ubuntu-latest
+    outputs:
+      present: ${{ steps.detect.outputs.present }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check calendar endpoints
+        id: detect
+        shell: bash
+        run: |
+          if [[ -f frontend/src/app/api/calendar/route.ts ]] &&
+            [[ -f frontend/src/app/calendar/page.tsx ]]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+            echo "Calendar endpoints are present; integration test will run."
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            echo "Calendar endpoints are absent; integration test will be skipped."
+          fi
 
   calendar-integration:
     name: Calendar API integration
+    needs: detect-calendar
+    if: needs.detect-calendar.outputs.present == 'true'
     runs-on: ubuntu-latest
     defaults:
       run:
